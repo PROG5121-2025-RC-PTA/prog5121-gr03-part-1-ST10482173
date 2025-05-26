@@ -1,0 +1,102 @@
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class Message{
+    private String messageID;
+    private String recipient;
+    private String messageText;
+    private String messageHash;
+    private static final List<String> messageList = new ArrayList<>();
+
+    public Message(String messageID, String recipient, String messageText) {
+        this.messageID = messageID;
+        this.recipient = recipient;
+        this.messageText = messageText;
+        this.messageHash = createMessageHash();
+    }
+    //Method for generating Message Hash
+    private String createMessageHash() {
+        return String.valueOf(new Random().nextInt(100000));
+    }
+    //Method to check Message ID
+    public boolean checkMessageID() {
+        return messageID.length() <= 10;
+    }
+    //Method to check Recipient Cell
+    public boolean checkRecipientCell() {
+        return recipient.length() <= 10 && recipient.startsWith("+");
+    }
+    //Method for Sending Messages
+    public void sentMessage() {
+        if (checkMessageID() && checkRecipientCell()) {
+            messageList.add("ID: " + messageID + ", Hash: " + messageHash + ", Recipient: " + recipient + ", Message: " + messageText);
+            JOptionPane.showMessageDialog(null, "Message Sent: \nID: " + messageID +
+                    "\nHash: " + messageHash +
+                    "\nRecipient: " + recipient +
+                    "\nMessage: " + messageText);
+        } else {
+            JOptionPane.showMessageDialog(null, "INVALID MESSAGE ID OR RECIPIENT CELL NUMBER");
+        }
+    }
+    //Method to send a list of Messages
+    public static String printMessages() {
+        StringBuilder printedMessages = new StringBuilder();
+        for (String msg : messageList) {
+            printedMessages.append(msg).append("\n");
+        }
+        return printedMessages.toString();
+    }
+    //Method runs the total number of messages
+    public static int returnTotalMessages() {
+        return messageList.size();
+    }
+    //Method to save JSON File
+    //OpenAI,ChatGpt(May,2025)
+}
+class QuickChat {
+    public static void main(String[] args) {
+        JOptionPane.showMessageDialog(null,"Welcome to QuickChat");
+        boolean running = true;
+        while (running) {
+            String menu = """
+                    1. Send a Message
+                    2. Show recently sent massage
+                    3. Quit""";
+            String choice = JOptionPane.showInputDialog(menu);
+
+            switch (choice) {
+                case "1":
+                    sendMessages();
+                    break;
+                case "2":
+                    JOptionPane.showMessageDialog(null, "Coming Soon");
+                    break;
+                case "3":
+                    running = false;
+                    JOptionPane.showMessageDialog(null, "Goodbye!");
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(null, "Invalid option. Please try again.");
+            }
+        }
+    }
+    private static void sendMessages() {
+        for (int i = 0; i < 2; i++) {
+            String messageID = JOptionPane.showInputDialog("Enter Message ID (max 10 characters):");
+            String recipient = JOptionPane.showInputDialog("Enter recipient cell number (max 10 characters, must start with +):");
+            String messageText = JOptionPane.showInputDialog("Enter your message (max 250 characters):");
+            if (messageText.length() > 250) {
+                JOptionPane.showMessageDialog(null, "Message too long. Please enter under 250 characters.");
+                i--; // Retry
+                continue;
+            }
+            Message message = new Message(messageID, recipient, messageText);
+            message.sentMessage();
+        }
+        Message  message = new Message("", "", ""); //Way to Access The static Method
+        JOptionPane.showMessageDialog(null, "All messages Sent: " + Message.printMessages());
+        JOptionPane.showMessageDialog(null,"Total Messages Sent: " + Message.returnTotalMessages());
+    }
+}
