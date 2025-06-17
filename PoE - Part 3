@@ -1,0 +1,161 @@
+import javax.swing.*;
+import java.util.*;
+
+class Message {
+    private String messageID;
+    private String recipient;
+    private String messageText;
+    private String messageHash;
+
+    public Message(String messageID, String recipient, String messageText) {
+        this.messageID = messageID;
+        this.recipient = recipient;
+        this.messageText = messageText;
+        this.messageHash = createMessageHash();
+    }
+
+    private String createMessageHash() {
+        return String.valueOf(new Random().nextInt(100000));
+    }
+
+    public boolean isValidID() {
+        return messageID.length() <= 10;
+    }
+
+    public boolean isValidRecipient() {
+        return recipient.length() <= 10 && recipient.startsWith("+");
+    }
+
+    public String getMessageID() { return messageID; }
+    public String getRecipient() { return recipient; }
+    public String getMessageText() { return messageText; }
+    public String getMessageHash() { return messageHash; }
+
+    @Override
+    public String toString() {
+        return "ID: " + messageID + ", Hash: " + messageHash + ", Recipient: " + recipient + ", Message: " + messageText;
+    }
+}
+
+class QuickChat {
+    static Message[] sentMessages = new Message[10];
+    static Message[] disregardedMessages = new Message[10];
+    static Message[] storedMessages = new Message[10];
+    static String[] messageHashes = new String[10];
+    static String[] messageIDs = new String[10];
+    static int sentCount = 0;
+    static int disregardedCount = 0;
+    static int storedCount = 0;
+
+    public static void main(String[] args) {
+        JOptionPane.showMessageDialog(null,"Welcome to QuickChat");
+        boolean running = true;
+        while (running) {
+            String menu = """
+                    1. Send a Message
+                    2. Show Recently Sent Messages
+                    3. Show Disregarded Messages
+                    4. Show Stored Messages
+                    5. Show Message Hashes
+                    6. Show Message IDs
+                    7. Show Longest Sent Message
+                    8. Quit""";
+            String choice = JOptionPane.showInputDialog(menu);
+
+            switch (choice) {
+                case "1":
+                    sendMessage();
+                    break;
+                case "2":
+                    showMessages(sentMessages, sentCount, "Sent Messages");
+                    break;
+                case "3":
+                    showMessages(disregardedMessages, disregardedCount, "Disregarded Messages");
+                    break;
+                case "4":
+                    showMessages(storedMessages, storedCount, "Stored Messages");
+                    break;
+                case "5":
+                    showArray(messageHashes, sentCount, "Message Hashes");
+                    break;
+                case "6":
+                    showArray(messageIDs, sentCount, "Message IDs");
+                    break;
+                case "7":
+                    showLongestMessage();
+                    break;
+                case "8":
+                    running = false;
+                    JOptionPane.showMessageDialog(null, "Goodbye!");
+                    break;
+                default:
+                    JOptionPane.showMessageDialog(null, "Invalid option. Please try again.");
+            }
+        }
+    }
+
+    private static void sendMessage() {
+        if (sentCount >= sentMessages.length) {
+            JOptionPane.showMessageDialog(null, "Message limit reached.");
+            return;
+        }
+        String messageID = JOptionPane.showInputDialog("Enter Message ID (max 10 characters):");
+        String recipient = JOptionPane.showInputDialog("Enter recipient cell number (must start with +, max 10 characters):");
+        String messageText = JOptionPane.showInputDialog("Enter your message (max 250 characters):");
+
+        if (messageText.length() > 250) {
+            JOptionPane.showMessageDialog(null, "Message too long. Try again.");
+            return;
+        }
+
+        Message msg = new Message(messageID, recipient, messageText);
+        if (msg.isValidID() && msg.isValidRecipient()) {
+            sentMessages[sentCount] = msg;
+            messageHashes[sentCount] = msg.getMessageHash();
+            messageIDs[sentCount] = msg.getMessageID();
+            sentCount++;
+            JOptionPane.showMessageDialog(null, "Message sent!\n" + msg);
+        } else {
+            disregardedMessages[disregardedCount++] = msg;
+            JOptionPane.showMessageDialog(null, "Invalid Message ID or Recipient. Message disregarded.");
+        }
+    }
+
+    private static void showMessages(Message[] array, int count, String title) {
+        if (count == 0) {
+            JOptionPane.showMessageDialog(null, "No " + title + ".");
+            return;
+        }
+        StringBuilder sb = new StringBuilder(title + ":\n\n");
+        for (int i = 0; i < count; i++) {
+            sb.append(array[i]).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private static void showArray(String[] array, int count, String title) {
+        if (count == 0) {
+            JOptionPane.showMessageDialog(null, "No " + title + ".");
+            return;
+        }
+        StringBuilder sb = new StringBuilder(title + ":\n\n");
+        for (int i = 0; i < count; i++) {
+            sb.append(array[i]).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, sb.toString());
+    }
+
+    private static void showLongestMessage() {
+        if (sentCount == 0) {
+            JOptionPane.showMessageDialog(null, "No messages sent.");
+            return;
+        }
+        Message longest = sentMessages[0];
+        for (int i = 1; i < sentCount; i++) {
+            if (sentMessages[i].getMessageText().length() > longest.getMessageText().length()) {
+                longest = sentMessages[i];
+            }
+        }
+        JOptionPane.showMessageDialog(null, "Longest Sent Message:\n" + longest);
+    }
+}
